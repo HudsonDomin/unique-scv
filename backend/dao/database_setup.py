@@ -49,22 +49,3 @@ def create_tables(conn):
     """)
     conn.commit()
     print("Tabelas verificadas/criadas.")
-
-def cleanup_database():
-    """
-    A função crucial: Fecha a conexão e DELETA o arquivo do BD.
-    Esta função é chamada automaticamente ao final da execução (pelo atexit).
-    """
-    global CONN
-    if CONN is not None:
-        CONN.close()
-        CONN = None
-        print("\nConexão com o BD fechada.")
-    
-    # Verifica se o arquivo existe antes de tentar apagar
-    if os.path.exists(DB_FILE):
-        try:
-            os.remove(DB_FILE)
-            print(f"*** Sucesso: Arquivo do banco de dados '{DB_FILE}' apagado. ***")
-        except OSError as e:
-            print(f"Erro ao apagar o arquivo do BD: {e}")

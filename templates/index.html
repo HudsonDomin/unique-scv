@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estacionamento - Hotel Paradise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .buttons {
+            display: grid;
+            gap: 15px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #11998e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0e8074;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        .status-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-label {
+            color: #666;
+        }
+
+        .status-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">🚗</div>
+            <h1>Sistema de Estacionamento</h1>
+            <p class="subtitle">Hotel Paradise</p>
+
+            <div class="buttons">
+                <a href="/guarita_recepcao.html" class="btn btn-primary">
+                    <span class="btn-icon">📍</span>
+                    <span>Guarita / Recepção</span>
+                </a>
+
+                <a href="/manobristas.html" class="btn btn-success">
+                    <span class="btn-icon">👨‍🔧</span>
+                    <span>Painel Manobristas</span>
+                </a>
+            </div>
+
+            <div class="status-box">
+                <div class="status-item">
+                    <span class="status-label">Status do Servidor</span>
+                    <span class="status-value" id="serverStatus">
+                        <span class="status-dot offline"></span>
+                        Verificando...
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Chamados Pendentes</span>
+                    <span class="status-value" id="chamadosCount">
+                        <strong>--</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Sistema desenvolvido para gerenciamento de estacionamento<br>
+            <a href="/docs" target="_blank">📚 Documentação da API</a>
+        </div>
+    </div>
+
+    <script>
+        // Verificar status do servidor
+        async function verificarStatus() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    document.getElementById('serverStatus').innerHTML = `
+                        <span class="status-dot online"></span>
+                        Online
+                    `;
+                } else {
+                    throw new Error('Servidor offline');
+                }
+            } catch (error) {
+                document.getElementById('serverStatus').innerHTML = `
+                    <span class="status-dot offline"></span>
+                    Offline
+                `;
+            }
+        }
+
+        // Carregar número de chamados pendentes
+        async function carregarChamados() {
+            try {
+                const response = await fetch('/api/chamados_pendentes');
+                const data = await response.json();
+                const count = data.chamados ? data.chamados.length : 0;
+                document.getElementById('chamadosCount').innerHTML = `<strong>${count}</strong>`;
+            } catch (error) {
+                document.getElementById('chamadosCount').innerHTML = '<strong>--</strong>';
+            }
+        }
+
+        // Conectar ao WebSocket para atualizações em tempo real
+        function conectarWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('WebSocket conectado');
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'chamados_update' && data.chamados) {
+                    document.getElementById('chamadosCount').innerHTML = 
+                        `<strong>${data.chamados.length}</strong>`;
+                } else if (data.type === 'novo_chamado' || data.type === 'chamado_atualizado') {
+                    carregarChamados();
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('Erro WebSocket:', error);
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket desconectado, tentando reconectar em 5s...');
+                setTimeout(conectarWebSocket, 5000);
+            };
+        }
+
+        // Inicializar ao carregar a página
+        window.addEventListener('load', function() {
+            verificarStatus();
+            carregarChamados();
+            conectarWebSocket();
+            
+            // Atualizar status periodicamente
+            setInterval(verificarStatus, 30000); // A cada 30 segundos
+        });
+    </script>
+</body>
+</html>

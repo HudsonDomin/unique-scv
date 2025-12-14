@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manobristas - Sistema de Estacionamento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-indicator.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-indicator.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected .status-dot {
+            background: #28a745;
+        }
+
+        .status-indicator.disconnected .status-dot {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .manobrista-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .manobrista-input label {
+            display: block;
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .manobrista-input input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .manobrista-input input:focus {
+            outline: none;
+            border-color: #11998e;
+            box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+        }
+
+        .chamados-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .chamados-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .badge {
+            background: #11998e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chamados-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .chamado-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .chamado-card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .chamado-card.prioritario {
+            border-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .prioridade-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffc107;
+            color: #856404;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .chamado-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-item strong {
+            color: #333;
+        }
+
+        .chamado-detalhes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .detalhe {
+            text-align: center;
+        }
+
+        .detalhe-label {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .detalhe-valor {
+            color: #333;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-atender {
+            background: #11998e;
+            color: white;
+        }
+
+        .btn-atender:hover:not(:disabled) {
+            background: #0e8074;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(17, 153, 142, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #11998e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Voltar ao Início</a>
+        
+        <div class="card">
+            <div class="header">
+                <h1>👨‍🔧 Painel de Manobristas</h1>
+                
+                <div class="header-controls">
+                    <div class="manobrista-input">
+                        <label for="nomeManobrista">Seu Nome</label>
+                        <input 
+                            type="text" 
+                            id="nomeManobrista" 
+                            placeholder="Digite seu nome"
+                            onchange="salvarNomeManobrista()"
+                        >
+                    </div>
+                    <div id="connectionStatus" class="status-indicator disconnected">
+                        <span class="status-dot"></span>
+                        <span>Desconectado</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="alertBox" class="alert"></div>
+
+            <div class="chamados-header">
+                <h2>Chamados Pendentes</h2>
+                <span class="badge" id="chamadosCount">0</span>
+            </div>
+
+            <div id="chamadosContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando chamados...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let reconnectInterval = null;
+        let chamados = [];
+
+        // Carregar nome do manobrista salvo
+        window.addEventListener('load', function() {
+            const nomeSalvo = localStorage.getItem('nomeManobrista');
+            if (nomeSalvo) {
+                document.getElementById('nomeManobrista').value = nomeSalvo;
+            }
+            conectarWebSocket();
+            carregarChamados();
+        });
+
+        // Salvar nome do manobrista
+        function salvarNomeManobrista() {
+            const nome = document.getElementById('nomeManobrista').value.trim();
+            if (nome) {
+                localStorage.setItem('nomeManobrista', nome);
+            }
+        }
+
+        // Conectar ao WebSocket
+        function conectarWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('WebSocket conectado');
+                atualizarStatusConexao(true);
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log('Mensagem recebida:', data);
+                
+                if (data.type === 'chamados_update') {
+                    chamados = data.chamados;
+                    renderizarChamados();
+                } else if (data.type === 'novo_chamado') {
+                    carregarChamados(); // Recarregar lista
+                    mostrarMensagem('🔔 Novo chamado recebido!', 'success');
+                } else if (data.type === 'chamado_atualizado') {
+                    carregarChamados(); // Recarregar lista
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('Erro WebSocket:', error);
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket desconectado');
+                atualizarStatusConexao(false);
+                
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(() => {
+                        console.log('Tentando reconectar...');
+                        conectarWebSocket();
+                    }, 3000);
+                }
+            };
+        }
+
+        // Atualizar status de conexão
+        function atualizarStatusConexao(conectado) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (conectado) {
+                statusEl.className = 'status-indicator connected';
+                statusEl.innerHTML = '<span class="status-dot"></span><span>Conectado</span>';
+            } else {
+                statusEl.className = 'status-indicator disconnected';
+                statusEl.innerHTML = '<span class="status-dot"></span><span>Desconectado</span>';
+            }
+        }
+
+        // Carregar chamados da API
+        async function carregarChamados() {
+            try {
+                const response = await fetch('/api/chamados_pendentes');
+                const data = await response.json();
+                chamados = data.chamados || [];
+                renderizarChamados();
+            } catch (error) {
+                console.error('Erro ao carregar chamados:', error);
+                mostrarMensagem('Erro ao carregar chamados', 'error');
+            }
+        }
+
+        // Renderizar lista de chamados
+        function renderizarChamados() {
+            const container = document.getElementById('chamadosContainer');
+            const countBadge = document.getElementById('chamadosCount');
+            
+            countBadge.textContent = chamados.length;
+
+            if (chamados.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <h3>Nenhum chamado pendente</h3>
+                        <p>Todos os veículos foram atendidos!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = chamados.map(chamado => `
+                <div class="chamado-card ${chamado.prioridade ? 'prioritario' : ''}">
+                    ${chamado.prioridade ? '<div class="prioridade-badge">⚠️ PRIORITÁRIO</div>' : ''}
+                    
+                    <div class="chamado-info">
+                        <div class="info-item">
+                            📍 <strong>${chamado.local_solicitacao}</strong>
+                        </div>
+                        <div class="info-item">
+                            🕐 ${formatarHorario(chamado.horario_solicitacao)}
+                        </div>
+                        <div class="info-item">
+                            ⏱️ Aguardando ${calcularTempoEspera(chamado.horario_solicitacao)}
+                        </div>
+                    </div>
+
+                    <div class="chamado-detalhes">
+                        <div class="detalhe">
+                            <div class="detalhe-label">Prisma</div>
+                            <div class="detalhe-valor">${chamado.prisma_id}</div>
+                        </div>
+                        <div class="detalhe">
+                            <div class="detalhe-label">Placa</div>
+                            <div class="detalhe-valor">${chamado.placa}</div>
+                        </div>
+                        <div class="detalhe">
+                            <div class="detalhe-label">Modelo</div>
+                            <div class="detalhe-valor">${chamado.modelo}</div>
+                        </div>
+                    </div>
+
+                    <button 
+                        class="btn btn-atender" 
+                        onclick="atenderChamado(${chamado.id})"
+                        id="btn-${chamado.id}"
+                    >
+                        Atender Chamado
+                    </button>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="chamados-list">${html}</div>`;
+        }
+
+        // Atender chamado
+        async function atenderChamado(id) {
+            const nomeManobrista = document.getElementById('nomeManobrista').value.trim();
+            
+            if (!nomeManobrista) {
+                mostrarMensagem('Por favor, insira seu nome antes de atender o chamado', 'error');
+                document.getElementById('nomeManobrista').focus();
+                return;
+            }
+
+            const btn = document.getElementById(`btn-${id}`);
+            btn.disabled = true;
+            btn.textContent = 'Atendendo...';
+
+            try {
+                const response = await fetch('/api/atender_chamado', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        manobrista: nomeManobrista
+                    })
+                });
+
+                if (response.ok) {
+                    mostrarMensagem('✓ Chamado atendido com sucesso!', 'success');
+                    carregarChamados();
+                } else {
+                    const error = await response.json();
+                    mostrarMensagem('Erro: ' + (error.detail || 'Erro desconhecido'), 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Atender Chamado';
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarMensagem('Erro de conexão com o servidor', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Atender Chamado';
+            }
+        }
+
+        // Formatar horário
+        function formatarHorario(isoString) {
+            const data = new Date(isoString);
+            return data.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        // Calcular tempo de espera
+        function calcularTempoEspera(isoString) {
+            const data = new Date(isoString);
+            const agora = new Date();
+            const diffMs = agora - data;
+            const diffMin = Math.floor(diffMs / 60000);
+            
+            if (diffMin < 1) return 'agora';
+            if (diffMin === 1) return '1 min';
+            return `${diffMin} min`;
+        }
+
+        // Mostrar mensagem
+        function mostrarMensagem(mensagem, tipo) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert ${tipo} show`;
+            alertBox.textContent = mensagem;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        // Atualizar lista periodicamente (fallback caso WebSocket falhe)
+        setInterval(() => {
+            if (ws && ws.readyState !== WebSocket.OPEN) {
+                carregarChamados();
+            }
+        }, 10000); // A cada 10 segundos
+    </script>
+</body>
+</html>

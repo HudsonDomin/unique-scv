@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guarita/Recepção - Sistema de Estacionamento</title>
+    <title>Chamadas - Sistema de Estacionamento</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,8 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url(https://cf.bstatic.com/xdata/images/hotel/max1024x768/734495812.jpg?k=4ebda7badf699ba60ca0e8121abd212ae1217046838f127b70f9c51af90df093&o=);
+            background-size: cover;
             min-height: 100vh;
             padding: 20px;
         }
@@ -249,7 +250,7 @@
         <div class="card">
             <div class="header">
                 <h1>🚗 Solicitar Veículo</h1>
-                <p>Guarita / Recepção</p>
+                <p>Guarita / Lobby / P4 / Docas</p>
                 <div id="connectionStatus" class="status-indicator disconnected">
                     <span class="status-dot"></span>
                     <span>Desconectado</span>
@@ -277,7 +278,9 @@
                 <label for="localSolicitacao">Local de Solicitação</label>
                 <select id="localSolicitacao">
                     <option value="Guarita">Guarita</option>
-                    <option value="Recepção">Recepção</option>
+                    <option value="Lobby">Lobby</option>
+                    <option value="P4">P4</option>
+                    <option value="Docas">Docas</option>
                 </select>
             </div>
 
